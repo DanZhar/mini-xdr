@@ -1,0 +1,48 @@
+name: mini-xdr
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: xdr
+      POSTGRES_PASSWORD: xdr
+      POSTGRES_DB: ti
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Runs only on first start (empty volume): creates the second database.
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xdr -d ti"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  redis:
+    image: redis:7-alpine
+    # Pure cache: no persistence needed.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  migrate-ti:
+    image: migrate/migrate:v4.18.3
+    volumes:
+      - ../migrations/ti:/migrations:ro
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://xdr:xdr@postgres:5432/ti?sslmode=disable"
+      - "up"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:
