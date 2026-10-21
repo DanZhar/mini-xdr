@@ -12,7 +12,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       # Runs only on first start (empty volume): creates the second database.
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./deploy/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U xdr -d ti"]
       interval: 2s
@@ -34,7 +34,7 @@ services:
   migrate-ti:
     image: migrate/migrate:v4.18.3
     volumes:
-      - ../migrations/ti:/migrations:ro
+      - ./migrations/ti:/migrations:ro
     command:
       - "-path=/migrations"
       - "-database=postgres://xdr:xdr@postgres:5432/ti?sslmode=disable"

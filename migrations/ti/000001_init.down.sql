@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS feeds;
+DROP TABLE IF EXISTS indicator_sources;
+DROP TABLE IF EXISTS indicators;
