@@ -1,16 +1,20 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz)
 
+	logger.Info("starting server", "addr", ":8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
-		log.Fatal(err)
+		logger.Error("server failed", "err", err)
+		os.Exit(1)
 	}
 }
 
