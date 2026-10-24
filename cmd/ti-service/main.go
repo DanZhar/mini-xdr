@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -28,6 +29,16 @@ func loadConfig() Config {
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	err := run(logger)
+
+	if err != nil {
+		logger.Error("ti-service failed", "err", err)
+		os.Exit(1)
+	}
+
+}
+
+func run(logger *slog.Logger) error {
 	cfg := loadConfig()
 
 	mux := http.NewServeMux()
@@ -51,8 +62,7 @@ func main() {
 
 	select {
 	case err := <-errCh:
-		logger.Error("server failed", "err", err)
-		os.Exit(1)
+		return fmt.Errorf("listen: %w", err)
 	case <-ctx.Done():
 		logger.Info("shutting down")
 
@@ -60,12 +70,12 @@ func main() {
 		defer cancel()
 
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			logger.Error("shutdown failed", "err", err)
-			os.Exit(1)
+			return fmt.Errorf("shutdown: %w", err)
 		}
 		logger.Info("server stopped")
 	}
 
+	return nil
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
