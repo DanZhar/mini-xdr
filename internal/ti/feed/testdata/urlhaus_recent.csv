@@ -1,0 +1,22 @@
+################################################################
+# abuse.ch URLhaus Database Dump (CSV - recent URLs only)      #
+# Last updated: 2026-10-24 07:18:54 (UTC)                      #
+#                                                              #
+# Terms Of Use: https://urlhaus.abuse.ch/api/                  #
+# For questions please contact urlhaus [at] abuse.ch           #
+################################################################
+#
+# id,dateadded,url,url_status,last_online,threat,tags,urlhaus_link,reporter
+"3980853","2026-10-24 07:18:54","https://github.com/GunnerEmbroider/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:54","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980853/","wristhulk"
+"3980850","2026-10-24 07:18:53","https://github.com/HyperLoopFlex/DiScorDObHoD/releases/download/DiscordObhod/zapret-discord-youtube-1.10.2.rar","online","2026-10-24 07:18:53","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980850/","wristhulk"
+"3980851","2026-10-24 07:18:53","https://github.com/MagicSpinnerFence29/FixDiscord/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip","online","2026-10-24 07:18:53","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980851/","wristhulk"
+"3980852","2026-10-24 07:18:53","https://github.com/LacquerMediator/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:53","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980852/","wristhulk"
+"3980846","2026-10-24 07:18:52","https://github.com/CyclonePupaWhirl/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.rar","online","2026-10-24 07:18:52","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980846/","wristhulk"
+"3980847","2026-10-24 07:18:52","https://github.com/Gatekrovision/DiscordObhod/releases/download/1.10.2/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:52","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980847/","wristhulk"
+"3980848","2026-10-24 07:18:52","https://github.com/GreenPoolTurbine/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:52","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980848/","wristhulk"
+"3980849","2026-10-24 07:18:52","https://github.com/Harmonicochimney/ZapretDiscord/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip","online","2026-10-24 07:18:52","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980849/","wristhulk"
+"3980842","2026-10-24 07:18:51","https://github.com/HyperLoopFlex/DiScOrDZapREt/releases/download/zapret-discord-youtube-1.10.2/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:51","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980842/","wristhulk"
+"3980843","2026-10-24 07:18:51","https://github.com/GoldenSeamanRage/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:51","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980843/","wristhulk"
+"3980844","2026-10-24 07:18:51","https://github.com/FiscalReckon/ZapretDiscord/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip","online","2026-10-24 07:18:51","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980844/","wristhulk"
+"3980843","not-a-date","https://github.com/GoldenSeamanRage/ZApRetDiscOrd/releases/download/DiscordZapret/zapret-discord-youtube-1.10.2.zip","online","2026-10-24 07:18:51","malware_download","github,SalatStealer,zapret,zip","https://urlhaus.abuse.ch/url/3980843/","wristhulk"
+"3980844","2026-10-24 07:18:51","https://github.com/FiscalReckon/ZapretDiscord/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip","online","2026-10-24 07:18:51","malware_download","","https://urlhaus.abuse.ch/url/3980844/","wristhulk"
