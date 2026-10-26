@@ -41,9 +41,14 @@ func (p URLhausParser) Parse(r io.Reader) ([]domain.Indicator, error) {
 			tags = strings.Split(rec[6], ",")
 		}
 
+		value, err := domain.NormalizeURL(rec[2])
+		if err != nil {
+			continue
+		}
+
 		indicator := domain.Indicator{
 			Type:      domain.TypeURL,
-			Value:     rec[2],
+			Value:     value,
 			Threat:    rec[5],
 			Tags:      tags,
 			FirstSeen: firstSeen,
