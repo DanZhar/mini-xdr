@@ -9,19 +9,27 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Config struct {
-	HTTPAddr string
+	HTTPAddr    string
+	DatabaseURL string
 }
 
 func loadConfig() Config {
-	addr, ok := os.LookupEnv("HTTP_ADDR")
+	config := Config{
+		HTTPAddr:    ":8080",
+		DatabaseURL: "postgres://xdr:xdr@localhost:5432/ti?sslmode=disable",
+	}
 
-	config := Config{HTTPAddr: ":8080"}
+	if v, ok := os.LookupEnv("HTTP_ADDR"); ok {
+		config.HTTPAddr = v
+	}
 
-	if ok {
-		config.HTTPAddr = addr
+	if v, ok := os.LookupEnv("DATABASE_URL"); ok {
+		config.DatabaseURL = v
 	}
 
 	return config
@@ -52,6 +60,18 @@ func run(logger *slog.Logger) error {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	pool, err := pgxpool.New(ctx, cfg.DatabaseURL)
+
+	if err != nil {
+		return fmt.Errorf("connect db: %w", err)
+	}
+
+	defer pool.Close()
+
+	if err := pool.Ping(ctx); err != nil {
+		return fmt.Errorf("ping db: %w", err)
+	}
 
 	errCh := make(chan error, 1)
 
