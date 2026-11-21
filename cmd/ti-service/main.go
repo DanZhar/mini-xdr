@@ -10,18 +10,22 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/DanZhar/mini-xdr/internal/ti/feeds"
+	"github.com/DanZhar/mini-xdr/internal/ti/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Config struct {
-	HTTPAddr    string
-	DatabaseURL string
+	HTTPAddr       string
+	DatabaseURL    string
+	URLhausAuthKey string
 }
 
 func loadConfig() Config {
 	config := Config{
-		HTTPAddr:    ":8080",
-		DatabaseURL: "postgres://xdr:xdr@localhost:5432/ti?sslmode=disable",
+		HTTPAddr:       ":8080",
+		DatabaseURL:    "postgres://xdr:xdr@localhost:5432/ti?sslmode=disable",
+		URLhausAuthKey: os.Getenv("URLHAUS_AUTH_KEY"),
 	}
 
 	if v, ok := os.LookupEnv("HTTP_ADDR"); ok {
@@ -71,6 +75,20 @@ func run(logger *slog.Logger) error {
 
 	if err := pool.Ping(ctx); err != nil {
 		return fmt.Errorf("ping db: %w", err)
+	}
+
+	if cfg.URLhausAuthKey != "" {
+		client := &http.Client{Timeout: time.Minute}
+		indicators, err := feeds.FetchURLhaus(ctx, client, cfg.URLhausAuthKey)
+		if err != nil {
+			return err
+		}
+
+		store := storage.NewIndicatorStore(pool)
+		if err := store.Upsert(ctx, "urlhaus", indicators); err != nil {
+			return fmt.Errorf("save URLhaus indicators: %w", err)
+		}
+		logger.Info("imported URLhaus indicators", "count", len(indicators))
 	}
 
 	errCh := make(chan error, 1)

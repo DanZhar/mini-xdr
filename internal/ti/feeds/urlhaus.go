@@ -1,15 +1,54 @@
 package feeds
 
 import (
+	"context"
 	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/DanZhar/mini-xdr/internal/ti/domain"
 )
+
+func FetchURLhaus(ctx context.Context, client *http.Client, authKey string) ([]domain.Indicator, error) {
+	endpoint := "https://urlhaus-api.abuse.ch/v2/files/exports/" + url.PathEscape(authKey) + "/recent.csv"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build URLhaus request: %w", err)
+	}
+
+	// The request URL contains the key and must not become a Referer on redirects.
+	downloadClient := *client
+	downloadClient.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	resp, err := downloadClient.Do(req)
+	if err != nil {
+		if requestErr, ok := err.(*url.Error); ok {
+			err = requestErr.Err
+		}
+		return nil, fmt.Errorf("download URLhaus CSV: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("download URLhaus CSV: HTTP %d", resp.StatusCode)
+	}
+
+	indicators, err := (URLhausParser{}).Parse(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("parse URLhaus CSV: %w", err)
+	}
+	if len(indicators) == 0 {
+		return nil, errors.New("URLhaus CSV contained no valid indicators")
+	}
+
+	return indicators, nil
+}
 
 type URLhausParser struct{}
 

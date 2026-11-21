@@ -24,7 +24,11 @@ build:
 	go build -o bin/ti-service ./cmd/ti-service
 
 run-ti:
-	go run ./cmd/ti-service
+	@if [ -z "$${URLHAUS_AUTH_KEY:-}" ] && [ -f .env ]; then \
+		URLHAUS_AUTH_KEY=$$(. ./.env && printf '%s' "$${URLHAUS_AUTH_KEY:-}") || exit $$?; \
+		export URLHAUS_AUTH_KEY; \
+	fi; \
+	exec go run ./cmd/ti-service
 
 test:
 	go test -race -count=1 ./...
