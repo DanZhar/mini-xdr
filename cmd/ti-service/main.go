@@ -78,17 +78,21 @@ func run(logger *slog.Logger) error {
 	}
 
 	if cfg.URLhausAuthKey != "" {
-		client := &http.Client{Timeout: time.Minute}
-		indicators, err := feeds.FetchURLhaus(ctx, client, cfg.URLhausAuthKey)
-		if err != nil {
-			return err
-		}
+		workerCtx, cancelWorker := context.WithCancel(ctx)
+		workerDone := make(chan struct{})
 
+		client := &http.Client{Timeout: time.Minute}
 		store := storage.NewIndicatorStore(pool)
-		if err := store.Upsert(ctx, "urlhaus", indicators); err != nil {
-			return fmt.Errorf("save URLhaus indicators: %w", err)
-		}
-		logger.Info("imported URLhaus indicators", "count", len(indicators))
+
+		go func() {
+			defer close(workerDone)
+			runURLhausWorker(workerCtx, logger, client, store, cfg.URLhausAuthKey)
+		}()
+
+		defer func() {
+			cancelWorker()
+			<-workerDone
+		}()
 	}
 
 	errCh := make(chan error, 1)
@@ -114,6 +118,51 @@ func run(logger *slog.Logger) error {
 	}
 
 	return nil
+}
+
+func runURLhausWorker(
+	ctx context.Context,
+	logger *slog.Logger,
+	client *http.Client,
+	store *storage.IndicatorStore,
+	authKey string,
+) {
+	for ctx.Err() == nil {
+		count, err := refreshURLhaus(ctx, client, store, authKey)
+		if ctx.Err() != nil {
+			return
+		}
+
+		if err != nil {
+			logger.Error("URLhaus import failed", "err", err)
+		} else {
+			logger.Info("imported URLhaus indicators", "count", count)
+		}
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(10 * time.Minute):
+		}
+	}
+}
+
+func refreshURLhaus(
+	ctx context.Context,
+	client *http.Client,
+	store *storage.IndicatorStore,
+	authKey string,
+) (int, error) {
+	indicators, err := feeds.FetchURLhaus(ctx, client, authKey)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := store.Upsert(ctx, "urlhaus", indicators); err != nil {
+		return 0, fmt.Errorf("save URLhaus indicators: %w", err)
+	}
+
+	return len(indicators), nil
 }
 
 func healthz(w http.ResponseWriter, r *http.Request) {
