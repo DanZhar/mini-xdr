@@ -15,6 +15,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const urlhausSource = "urlhaus"
+
 type Config struct {
 	HTTPAddr       string
 	DatabaseURL    string
@@ -83,10 +85,11 @@ func run(logger *slog.Logger) error {
 
 		client := &http.Client{Timeout: time.Minute}
 		store := storage.NewIndicatorStore(pool)
+		feedStore := storage.NewFeedStore(pool)
 
 		go func() {
 			defer close(workerDone)
-			runURLhausWorker(workerCtx, logger, client, store, cfg.URLhausAuthKey)
+			runURLhausWorker(workerCtx, logger, client, store, feedStore, cfg.URLhausAuthKey)
 		}()
 
 		defer func() {
@@ -125,18 +128,25 @@ func runURLhausWorker(
 	logger *slog.Logger,
 	client *http.Client,
 	store *storage.IndicatorStore,
+	feedStore *storage.FeedStore,
 	authKey string,
 ) {
 	for ctx.Err() == nil {
 		count, err := refreshURLhaus(ctx, client, store, authKey)
+		finishedAt := time.Now()
 		if ctx.Err() != nil {
 			return
 		}
 
+		var lastCount *int
 		if err != nil {
 			logger.Error("URLhaus import failed", "err", err)
 		} else {
+			lastCount = &count
 			logger.Info("imported URLhaus indicators", "count", count)
+		}
+		if err := feedStore.RecordFetch(ctx, urlhausSource, finishedAt, lastCount); err != nil && ctx.Err() == nil {
+			logger.Error("save URLhaus import status", "err", err)
 		}
 
 		select {
@@ -158,7 +168,7 @@ func refreshURLhaus(
 		return 0, err
 	}
 
-	if err := store.Upsert(ctx, "urlhaus", indicators); err != nil {
+	if err := store.Upsert(ctx, urlhausSource, indicators); err != nil {
 		return 0, fmt.Errorf("save URLhaus indicators: %w", err)
 	}
 
